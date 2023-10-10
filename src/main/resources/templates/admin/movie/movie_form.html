@@ -44,8 +44,24 @@
         $("#genreSelect").change(function() {
           let selectedGenreId = $(this).val();
           console.log("Выбран жанр с id: " + selectedGenreId);
+
+          $.ajax({
+            url: "/api/genres/list", // Маршрут для получения списка жанров
+            type: "GET", // Используем GET-запрос для получения списка жанров
+            data: {
+              genreId: selectedGenreId
+            },
+            success: function(response) {
+              console.log("Жанры успешно получены с сервера:", response);
+              // Обработка полученных жанров, например, обновление выпадающего списка
+            },
+            error: function(error) {
+              console.error("Ошибка при получении списка жанров: " + error);
+            }
+          });
         });
-      });
+      }
+      );
     </script>
   </head>
 

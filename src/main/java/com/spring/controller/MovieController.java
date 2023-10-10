@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.spring.model.*;
+import com.spring.repository.MovieRepository;
 import com.spring.repository.UserRepository;
 import com.spring.security.MyUserDetails;
 import com.spring.service.*;
@@ -21,6 +22,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.spring.model.Genre; // Import Genre class
+import com.spring.repository.GenreRepository; // Import GenreRepository if you have one
+
 
 import javax.validation.Valid;
 
@@ -122,8 +127,14 @@ public class MovieController {
         return "admin/movie/movie_form";
     }
 
+    @Autowired
+    private GenreRepository genreRepository;
+
     @RequestMapping(value = "/admin/movies/add", method = RequestMethod.POST)
-    public String addMovie(@AuthenticationPrincipal MyUserDetails principal, @RequestParam(value = "file") MultipartFile file, @Valid Movie movie, BindingResult result, Model model) {
+    public String addMovie(@AuthenticationPrincipal MyUserDetails principal,
+                           @RequestParam(value = "file") MultipartFile file,
+                           @RequestParam(value = "genreId") Long genreId,  // Получаем genreId из запроса
+                           @Valid Movie movie, BindingResult result, Model model) {
         if (result.hasErrors()) {
             List<Producer> producers = producerService.getProducers();
             model.addAttribute("producers", producers);
@@ -131,6 +142,11 @@ public class MovieController {
         }
         try {
             User user = authService.profile(principal);
+
+            // Здесь вызовите findById() из GenreRepository
+            Genre genre = genreRepository.findById(genreId).orElse(null);
+            movie.setGenre(genre);
+
             String path = FileUpload.saveImage(ImageType.MOVIE_POSTER, movie.getName(), file);
             movie.setPoster(path);
             movie.setUser(user);
@@ -157,26 +173,36 @@ public class MovieController {
     }
 
     @RequestMapping(value = "/admin/movies/edit/{id}", method = RequestMethod.POST)
-    public String updateMovie(@AuthenticationPrincipal MyUserDetails principal, @PathVariable("id") long id, Movie movie, BindingResult result, Model model,
-                              @RequestParam(value = "file", required = false) MultipartFile file) {
+    public String updateMovie(@AuthenticationPrincipal MyUserDetails principal, @PathVariable("id") long id,
+                              @RequestParam(value = "file", required = false) MultipartFile file,
+                              @RequestParam(value = "genreId") Long genreId,  // Получаем genreId из запроса
+                              @Valid Movie movie, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return "redirect:/admin/movie/movie_form";
+            return "redirect:/admin/movies/edit/" + id;
         }
         try {
+            User user = authService.profile(principal);
+
+            // Здесь вызовите findById() из GenreRepository
+            Genre genre = genreRepository.findById(genreId).orElse(null);
+            movie.setGenre(genre);
+
             if (!file.isEmpty()) {
                 String path = FileUpload.saveImage(ImageType.MOVIE_POSTER, movie.getName(), file);
                 movie.setPoster(path);
             } else {
                 movie.setPoster(movieService.getMovieById(id).getPoster());
             }
-            User user = authService.profile(principal);
+
             movie.setUser(user);
+            movie.setId(id); // Установите ID фильма для обновления
             movieService.saveMovie(movie);
         } catch (Exception e) {
-            return "admin/movie/movie_form";
+            return "admin/movie/movie_update";
         }
         return "redirect:/admin/userMovies";
     }
+
 
     @RequestMapping("/admin/movies/delete/{id}")
     public String deleteMovie(@PathVariable("id") long id, Model model) {
