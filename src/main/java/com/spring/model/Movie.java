@@ -33,9 +33,9 @@ public class Movie {
     @Column(name = "rating", nullable = true, columnDefinition = "Decimal(3,1)")
     private Double rating;
 
-    @Column(name = "genre", nullable = false, columnDefinition = "TEXT")
-    @NotEmpty(message = "Заполните жанр")
-    private String genre;
+    @ManyToOne
+    @JoinColumn(name = "genre_id", referencedColumnName = "id")
+    private Genre genre;
 
     @Column(name = "status", nullable = false, columnDefinition = "TEXT")
     @NotEmpty(message = "Укажите статус")
@@ -88,7 +88,6 @@ public class Movie {
         this.name = name;
         this.releaseDate = releaseDate;
         this.rating = rating;
-        this.genre = genre;
         this.status = status;
         this.poster = poster;
         this.description = description;
@@ -126,14 +125,6 @@ public class Movie {
 
     public void setRating(Double rating) {
         this.rating = rating;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
     }
 
     public String getStatus() {
@@ -245,6 +236,14 @@ public class Movie {
 
     public void setTotalFinance(double totalFinance) {
         this.totalFinance = totalFinance;
+    }
+
+    public Genre getGenre() {
+        return genre;
+    }
+
+    public void setGenre(Genre genre) {
+        this.genre = genre;
     }
 
     @Override

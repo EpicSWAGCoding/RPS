@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
   <head>
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
     <meta charset="UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -29,6 +30,23 @@
         });
       });
     </script>
+    <script>
+      // Заполнение выпадающего списка данными из API
+      $(document).ready(function() {
+        $.get("/api/genres/list", function(data) {
+          data.forEach(function(genre) {
+            $("#genreSelect").append('<option value="' + genre.id + '">' + genre.name + '</option>');
+          });
+        });
+      });
+      $(document).ready(function() {
+        // Обработчик события change для выпадающего списка
+        $("#genreSelect").change(function() {
+          let selectedGenreId = $(this).val();
+          console.log("Выбран жанр с id: " + selectedGenreId);
+        });
+      });
+    </script>
   </head>
 
   <body>
@@ -39,14 +57,14 @@
         <form th:object="${movie}" th:action="@{/admin/movies/add}" method="post" enctype="multipart/form-data">
           <div class="form-row">
             <div class="form-group col-md-6">
-              <label for="name">Name</label>
+              <label for="name">Название</label>
               <input type="text" th:field="*{name}" name="name"  class="form-control" id="name"/>
               <div class="alert alert-warning" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
             </div>
 
 
             <div class="form-group col-md-6">
-              <label for="release_date">Release Date</label>
+              <label for="release_date">Год производства</label>
               <input
                 name="release_date"
                 th:value="${#dates.format(movie.releaseDate,'yyyy-mm-dd')}"
@@ -60,21 +78,15 @@
           </div>
 
           <div class="form-group">
-            <label for="genre">Genre</label>
-            <input
-              name="genre"
-              th:field="*{genre}"
-              type="text"
-              class="form-control"
-              id="genre"
-              placeholder="Horror"
-            />
+            <select id="genreSelect">
+              <option th:value="*{genre}">Выберите жанр</option>
+            </select>
           </div>
           <div class="alert alert-warning" th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}"></div>
 
 
         <div style=" margin-bottom: 0rem" class="form-group">
-          <legend style="font-size: 1rem;" for="status">Status:</legend>
+          <legend style="font-size: 1rem;" for="status">Статус:</legend>
           <div  style=" margin-left: -1.5rem;" class="custom-control custom-control-inline">
             <input style="margin-right: 3px; margin-top: 3px;" type="radio" id="status1" th:field="*{status}" value="Ищет финансирования">
             <label style="margin-top: 10px" for="No">Ищет финансирования</label>
@@ -94,7 +106,7 @@
 
 
           <div class="form-group">
-            <label for="poster">Poster</label>
+            <label for="poster">Постер</label>
             <img
               height="30px"
               width="30px"
@@ -107,7 +119,7 @@
 
           <div class="input-group input-group-sm mb-3" >
             <div class="input-group-prepend">
-              <span class="input-group-text" id="producer">Producer</span>
+              <span class="input-group-text" id="producer">Режиссер</span>
             </div>
             <input id="Producer_Name" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" name="ProducerName"/>
             <input id="Producer_Id" type="hidden" name="producerId" th:field="*{producers}"/>
@@ -115,7 +127,7 @@
           <div class="alert alert-warning" th:if="${#fields.hasErrors('producers')}" th:errors="*{producers}"></div>
 
           <div class="form-group">
-            <label for="filmСrew">Film crew</label>
+            <label for="filmСrew">Съемочная группа</label>
             <textarea
                     th:field="*{filmCrew}"
                     class="form-control"
@@ -125,7 +137,7 @@
           </div>
 
           <div class="form-group">
-            <label for="description">Description</label>
+            <label for="description">Описание</label>
             <textarea
               th:field="*{description}"
               class="form-control"
@@ -139,7 +151,7 @@
             class="btn btn-primary"
             th:text="(${movie.id}?'Update':'Add')"
           >
-            Add
+            Добавить
           </button>
         </form>
       </div>
