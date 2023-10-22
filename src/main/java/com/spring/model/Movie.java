@@ -83,10 +83,11 @@ public class Movie {
     public Movie() {
     }
 
-    public Movie(String name, Date releaseDate, Double rating, String genre, String poster, String description, String filmCrew, String status,
+    public Movie(String name, Date releaseDate, Double rating, Set<Genre> genre, String poster, String description, String filmCrew, String status,
             Set<Producer> producers,Set<User>watchlistUsers) {
         this.name = name;
         this.releaseDate = releaseDate;
+        this.genre = (Genre) genre;
         this.rating = rating;
         this.status = status;
         this.poster = poster;

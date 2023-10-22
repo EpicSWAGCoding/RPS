@@ -1,10 +1,12 @@
 package com.spring.controller;
 
+import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.spring.model.*;
 import com.spring.repository.MovieRepository;
@@ -14,6 +16,7 @@ import com.spring.service.*;
 import com.spring.utility.FileUpload;
 import com.spring.utility.constants.ImageType;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -133,7 +136,6 @@ public class MovieController {
     @RequestMapping(value = "/admin/movies/add", method = RequestMethod.POST)
     public String addMovie(@AuthenticationPrincipal MyUserDetails principal,
                            @RequestParam(value = "file") MultipartFile file,
-                           @RequestParam(value = "genreId") Long genreId,  // Получаем genreId из запроса
                            @Valid Movie movie, BindingResult result, Model model) {
         if (result.hasErrors()) {
             List<Producer> producers = producerService.getProducers();
@@ -143,19 +145,23 @@ public class MovieController {
         try {
             User user = authService.profile(principal);
 
-            // Здесь вызовите findById() из GenreRepository
-            Genre genre = genreRepository.findById(genreId).orElse(null);
+            Genre genre = genreRepository.findById(movie.getGenre().getId()).orElse(null);
             movie.setGenre(genre);
 
             String path = FileUpload.saveImage(ImageType.MOVIE_POSTER, movie.getName(), file);
             movie.setPoster(path);
             movie.setUser(user);
             movieService.saveMovie(movie);
+
+            return "redirect:/admin/userMovies"; // Успешное выполнение сохранения фильма
         } catch (Exception e) {
+            // Обработка исключений (например, ошибка сохранения фильма)
+            model.addAttribute("error", "Произошла ошибка при сохранении фильма: " + e.getMessage());
             return "admin/movie/movie_form";
         }
-        return "redirect:/admin/userMovies";
     }
+
+
 
     @RequestMapping(value = "/admin/movies/edit/{id}", method = RequestMethod.GET)
     public String updateMovieForm(@PathVariable("id") long id, Model model) {
