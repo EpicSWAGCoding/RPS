@@ -52,6 +52,8 @@ public class MovieController {
 
     @Autowired
     private PostService postService;
+    @Autowired
+    private GenreService genreService;
 
     @RequestMapping("/movies")
     public String getHomeMovies(Model model, @RequestParam(defaultValue = "") String searchKey) {
@@ -126,7 +128,9 @@ public class MovieController {
     @RequestMapping(value = "/admin/movies/add", method = RequestMethod.GET)
     public String addMovieForm(@ModelAttribute("movie") Movie movie, Model model) {
         List<Producer> producers = producerService.getProducers();
+        List<Genre> genres = genreService.getGenres();
         model.addAttribute("producers", producers);
+        model.addAttribute("genre", genres);
         return "admin/movie/movie_form";
     }
 
@@ -181,7 +185,7 @@ public class MovieController {
     @RequestMapping(value = "/admin/movies/edit/{id}", method = RequestMethod.POST)
     public String updateMovie(@AuthenticationPrincipal MyUserDetails principal, @PathVariable("id") long id,
                               @RequestParam(value = "file", required = false) MultipartFile file,
-                              @RequestParam(value = "genreId") Long genreId,  // Получаем genreId из запроса
+                              @RequestParam(value = "genre") Genre genre,  // Получаем genreId из запроса
                               @Valid Movie movie, BindingResult result, Model model) {
         if (result.hasErrors()) {
             return "redirect:/admin/movies/edit/" + id;
@@ -190,7 +194,7 @@ public class MovieController {
             User user = authService.profile(principal);
 
             // Здесь вызовите findById() из GenreRepository
-            Genre genre = genreRepository.findById(genreId).orElse(null);
+//            Genre genre = genreRepository.findById(genreId).orElse(null);
             movie.setGenre(genre);
 
             if (!file.isEmpty()) {

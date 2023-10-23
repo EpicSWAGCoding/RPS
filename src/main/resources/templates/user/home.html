@@ -105,9 +105,32 @@
                 <p th:if="${genreDesk == true}" class="material-icons">arrow_downward</p>
             <a th:href="@{'/page/' + ${currentPage} + '?sortField=genre&sortDir=' + ${reverseSortDir}}">Жанр</a>
                 </span>
-            <form th:href="@{'/page/' + ${currentPage} + '?sortField=rating&sortDir=desc' + '&searchKey=' + ${searchKey}} " method="post" style="margin-top: 2rem;">
-                <input style="margin-left: -10rem;" type="text" th:name="searchKey" class="form-control" id="searchKey" required>
-            </form>
+            <div class="contaier">
+                <div class="row">
+                    <div class="col-md-4">
+                        <form th:href="@{'/page/' + ${currentPage} + '?sortField=rating&sortDir=desc' + '&searchKey=' + ${searchKey}} " method="post" style="margin-top: 2rem;">
+                            <input style="margin-left: -10rem;" type="text" th:name="searchKey" class="form-control" id="searchKey" required>
+                        </form>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="dropdown">Жанры:</label>
+                            <select class="form-control" id="dropdown">
+                                <option value="option1">Комедия</option> <!-- Тут жанры тоже с бд должны подгружаться -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="dropdown2">Режисеры:</label>
+                            <select class="form-control" id="dropdown2">
+                                <option value="option1">Жак Фреско</option> <!-- Тут режисеры тоже с бд должны подгружаться -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
     <div class="container">
